@@ -3,6 +3,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #a9a9a9;
 }
 
 #scatterplot-graph {
@@ -17,8 +18,25 @@ body {
 #svg-container {
   position: relative;
   width: 100%;
+  box-shadow: 5px 5px 30px;
 }
 
 svg {
   display: block;
+}
+
+#tooltip {
+  pointer-events: none;
+  background-color: #b0c4de;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+@media (max-width: 700px) {
+  #tooltip {
+    font-size: 2vw;
+    padding: 8px;
+  }
 }

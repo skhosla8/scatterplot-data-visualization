@@ -17,13 +17,24 @@
 
     <script>
         const margin = {
-            top: 80,
+            top: 90,
             right: 80,
             bottom: 80,
             left: 80,
         },
             width = 900,
             height = 500;
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const timeFormat = d3.timeFormat('%M:%S');
+
+        const tooltip = d3
+            .select('body')
+            .append('div')
+            .attr('id', 'tooltip')
+            .style('opacity', 0)
+            .style('position', 'absolute');
 
         const svg = d3
             .select('#svg-container')
@@ -61,13 +72,13 @@
 
                 const xAxis = d3.axisBottom(xScale).tickFormat(d3.format('d'));
 
-                const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat('%M:%S'));
+                const yAxis = d3.axisLeft(yScale).tickFormat(timeFormat);
 
                 svg
                     .append('text')
                     .attr('id', 'title')
                     .attr('x', width / 2)
-                    .attr('y', height - 440)
+                    .attr('y', height - 450)
                     .style('text-anchor', 'middle')
                     .style('font-size', '1.75rem')
                     .attr('font-weight', 600)
@@ -76,7 +87,7 @@
                 svg
                     .append('text')
                     .attr('x', width / 2)
-                    .attr('y', height - 415)
+                    .attr('y', height - 425)
                     .attr('text-anchor', 'middle')
                     .style('font-size', '1.1rem')
                     .style('font-weight', 600)
@@ -85,9 +96,9 @@
                 svg
                     .append('text')
                     .attr('transform', 'rotate(-90)')
-                    .attr('x', 0 - (height - 420))
+                    .attr('x', 0 - (height - 300))
                     .attr('y', 6)
-                    .attr('dy', '6.2em')
+                    .attr('dy', '1.7em')
                     .attr('text-anchor', 'end')
                     .style('font-size', '1rem')
                     .style('font-weight', 600)
@@ -109,22 +120,34 @@
                     .data(data)
                     .enter()
                     .append('circle')
-                    .attr('r', 5)
+                    .attr('r', 6)
                     .attr('cx', (d) => xScale(d.Year))
                     .attr('cy', (d) => yScale(d.Time))
                     .attr('data-xvalue', (d) => d.Year)
                     .attr('data-yvalue', (d) => d.Time)
                     .attr('class', 'dot')
                     .style('stroke', '#000')
-                    .style('fill', '#000')
-                    .style('opacity', 0.8);
-
-                const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-                const legend_keys = ['No doping allegations', 'Riders with doping allegations'];
+                    .style('fill', (d) => color(d.Doping !== ''))
+                    .style('opacity', 0.8)
+                    .on('mouseover', function (event, d) {
+                        tooltip
+                            .style('opacity', 0.9)
+                            .attr('data-year', d.Year)
+                            .html(
+                                d.Name + ', ' + d.Nationality + '<br/>' +
+                                'Year: ' + d.Year + ', ' + '<b>Time: ' + timeFormat(d.Time) +
+                                (d.Doping ? '<br/><br/>' + d.Doping : '')
+                            )
+                            .style('left', event.pageX + 10 + 'px')
+                            .style('top', event.pageY + 'px');
+                    })
+                    .on('mouseout', function (event, d) {
+                        tooltip
+                            .style('opacity', 0);
+                    });
 
                 const legend = svg.selectAll('#legend')
-                    .data(legend_keys)
+                    .data(color.domain())
                     .enter()
                     .append('g')
                     .attr('id', 'legend')
@@ -142,11 +165,16 @@
                     .append('text')
                     .attr('transform', 'translate(-10, 14)')
                     .attr('text-anchor', 'end')
-                    .text((d) => d);
+                    .text(function (d) {
+                        if (d) {
+                            return 'Riders with doping allegations';
+                        } else {
+                            return 'No doping allegations';
+                        }
+                    });
             })
             .catch((error) => console.log(error));
     </script>
-    <script src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"></script>
 </body>
 
 </html>
